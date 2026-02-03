@@ -54,3 +54,29 @@ class ANSDownloader:
         quarters = sorted(quarters, key=lambda x: (x[0], x[1]), reverse=True)[:3]
         print(f"\nÚltimos 3 trimestres: {[(q[1]+q[0], q[2]) for q in quarters]}")
         return quarters
+    
+    def download_quarter_files(self, year: str, quarter: str, file_url: str) -> Path:
+        filename = f"{quarter}{year}.zip"
+        file_path = self.download_dir / filename
+        
+        if file_path.exists():
+            print(f"  Arquivo já existe: {filename}")
+            return file_path
+        
+        print(f"  Baixando: {filename}")
+        response = requests.get(file_url, timeout=300, stream=True)
+        response.raise_for_status()
+        
+        total_size = int(response.headers.get('content-length', 0))
+        downloaded = 0
+        
+        with open(file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+                downloaded += len(chunk)
+                if total_size > 0:
+                    progress = (downloaded / total_size) * 100
+                    print(f"    Progresso: {progress:.1f}%", end='\r')
+        
+        print(f"\n    Download completo: {filename}")
+        return file_path
