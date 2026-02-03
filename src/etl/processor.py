@@ -2,6 +2,8 @@ import pandas as pd
 from pathlib import Path
 from typing import List, Dict, Tuple
 from src.etl.validator import validate_cnpj, normalize_cnpj
+from bs4 import BeautifulSoup
+import requests
 
 class ANSProcessor:
     def __init__(self, output_dir: str = "data/processed"):
@@ -190,3 +192,28 @@ class ANSProcessor:
         print(f"Arquivo compactado: {zip_path}")
         
         return df
+    
+    def download_operadoras_cadastro(self, output_file: str = "operadoras_cadastro.csv") -> Path:
+        cadastro_url = "https://dadosabertos.ans.gov.br/FTP/PDA/operadoras_de_plano_de_saude_ativas/"
+        
+        response = requests.get(cadastro_url, timeout=30)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        csv_link = None
+        for link in soup.find_all('a', href=True):
+            if '.csv' in link['href'].lower():
+                csv_link = cadastro_url + link['href']
+                break
+        
+        if not csv_link:
+            raise ValueError("Arquivo CSV de cadastro não encontrado")
+        
+        print(f"Baixando cadastro de operadoras: {csv_link}")
+        csv_response = requests.get(csv_link, timeout=60)
+        
+        output_path = self.output_dir / output_file
+        with open(output_path, 'wb') as f:
+            f.write(csv_response.content)
+        
+        print(f"Cadastro salvo: {output_path}")
+        return output_path
