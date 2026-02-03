@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Tuple
 
 class ANSProcessor:
     def __init__(self, output_dir: str = "data/processed"):
@@ -71,3 +71,51 @@ class ANSProcessor:
                     break
         
         return normalized_df
+    
+    def process_files(self, directories: List[Tuple[str, str, Path]]) -> List[Dict]:
+        all_data = []
+        
+        for year, quarter, directory in directories:
+            print(f"\nProcessando arquivos de {year}/{quarter}...")
+            print(f"Diretório: {directory}")
+            
+            if not directory.exists():
+                print(f"AVISO: Diretório não existe: {directory}")
+                continue
+            
+            files = self.find_despesas_files(directory)
+            
+            print(f"Encontrados {len(files)} arquivos de despesas")
+            
+            for file_path in files:
+                try:
+                    print(f"Lendo: {file_path.name}")
+                    df = self.read_file(file_path)
+                    print(f"  Shape do arquivo: {df.shape}")
+                    print(f"  Primeiras colunas: {list(df.columns)[:10]}")
+                    
+                    df_normalized = self.normalize_columns(df)
+                    print(f"  Colunas normalizadas: {list(df_normalized.columns)}")
+                    
+                    if 'cnpj' not in df_normalized.columns:
+                        print(f"Arquivo ignorado (sem coluna CNPJ após normalização): {file_path.name}")
+                        continue
+                    
+                    for _, row in df_normalized.iterrows():
+                        record = {
+                            'CNPJ': row.get('cnpj', ''),
+                            'RazaoSocial': row.get('razao_social', ''),
+                            'Trimestre': quarter if quarter else self._extract_quarter(row.get('data', '')),
+                            'Ano': year,
+                            'ValorDespesas': row.get('valor', 0),
+                            '_source_file': file_path.name
+                        }
+                        all_data.append(record)
+                    
+                except Exception as e:
+                    print(f"Erro ao processar {file_path.name}: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    continue
+        
+        return all_data
