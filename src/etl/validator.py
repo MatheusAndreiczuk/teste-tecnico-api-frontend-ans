@@ -27,3 +27,15 @@ def validate_cnpj(cnpj: str) -> bool:
     second_digit = calculate_digit(cnpj[:13], weights_second)
     
     return int(cnpj[13]) == second_digit
+
+def validate_positive_value(value) -> bool:
+    try:
+        return float(value) > 0
+    except (ValueError, TypeError):
+        return False
+
+
+def validate_non_empty(text: str) -> bool:
+    if text is None:
+        return False
+    return len(str(text).strip()) > 0
