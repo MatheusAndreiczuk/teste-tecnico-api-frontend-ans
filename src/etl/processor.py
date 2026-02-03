@@ -1,3 +1,4 @@
+import pandas as pd
 from pathlib import Path
 from typing import List
 
@@ -29,3 +30,24 @@ class ANSProcessor:
         
         print(f"  Arquivos de despesas encontrados: {len(files)}")
         return files
+    
+    def read_file(self, file_path: Path) -> pd.DataFrame:
+        encodings = ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']
+        
+        for encoding in encodings:
+            try:
+                if file_path.suffix.lower() in ['.xlsx', '.xls']:
+                    return pd.read_excel(file_path)
+                elif file_path.suffix.lower() in ['.csv', '.txt']:
+                    separators = [';', ',', '|', '\t']
+                    for sep in separators:
+                        try:
+                            df = pd.read_csv(file_path, encoding=encoding, sep=sep, low_memory=False)
+                            if len(df.columns) > 1:
+                                return df
+                        except:
+                            continue
+            except Exception as e:
+                continue
+        
+        raise ValueError(f"Não foi possível ler o arquivo: {file_path}")
