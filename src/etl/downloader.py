@@ -1,4 +1,5 @@
 import requests
+import zipfile
 from pathlib import Path
 from bs4 import BeautifulSoup
 from typing import List, Tuple
@@ -80,3 +81,20 @@ class ANSDownloader:
         
         print(f"\n    Download completo: {filename}")
         return file_path
+    
+    def extract_zip(self, zip_path: Path) -> List[Path]:
+        extract_dir = self.download_dir / f"extracted_{zip_path.stem}"
+        extract_dir.mkdir(parents=True, exist_ok=True)
+        
+        print(f"  Extraindo: {zip_path.name}")
+        
+        extracted_files = []
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            for file_info in zip_ref.filelist:
+                extracted_path = extract_dir / file_info.filename
+                zip_ref.extract(file_info, extract_dir)
+                if not file_info.is_dir():
+                    extracted_files.append(extracted_path)
+        
+        print(f"  Extraídos {len(extracted_files)} arquivos")
+        return extracted_files
