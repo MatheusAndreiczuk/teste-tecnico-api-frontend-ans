@@ -51,3 +51,23 @@ class ANSProcessor:
                 continue
         
         raise ValueError(f"Não foi possível ler o arquivo: {file_path}")
+    
+    def normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        column_mapping = {
+            'cnpj': ['cnpj', 'cd_cnpj', 'num_cnpj', 'cnpj_operadora'],
+            'razao_social': ['razao_social', 'razao', 'nome', 'nm_razao_social', 'nome_operadora'],
+            'valor': ['valor', 'vl_despesa', 'despesa', 'vl_sinistro', 'sinistro', 'valor_despesas'],
+            'data': ['data', 'dt_referencia', 'periodo', 'competencia', 'dt_competencia'],
+        }
+        
+        normalized_df = pd.DataFrame()
+        
+        df.columns = df.columns.str.lower().str.strip()
+        
+        for standard_col, possible_names in column_mapping.items():
+            for col in df.columns:
+                if any(name in col for name in possible_names):
+                    normalized_df[standard_col] = df[col]
+                    break
+        
+        return normalized_df
