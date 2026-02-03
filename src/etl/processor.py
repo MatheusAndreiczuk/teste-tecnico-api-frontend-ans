@@ -285,3 +285,25 @@ class ANSProcessor:
         print(f"\nDados enriquecidos salvos: {output_path}")
         
         return df_enriched
+    
+    def aggregate_data(self, enriched_csv: str, output_file: str = "despesas_agregadas.csv") -> pd.DataFrame:
+        df = pd.read_csv(self.output_dir / enriched_csv, encoding='utf-8-sig')
+        
+        if 'UF' not in df.columns:
+            df['UF'] = 'N/A'
+        
+        df_agg = df.groupby(['RazaoSocial', 'UF']).agg({
+            'ValorDespesas': ['sum', 'mean', 'std', 'count']
+        }).reset_index()
+        
+        df_agg.columns = ['RazaoSocial', 'UF', 'TotalDespesas', 'MediaDespesas', 'DesvioPadrao', 'NumRegistros']
+        
+        df_agg['DesvioPadrao'] = df_agg['DesvioPadrao'].fillna(0)
+        
+        df_agg = df_agg.sort_values('TotalDespesas', ascending=False)
+        
+        output_path = self.output_dir / output_file
+        df_agg.to_csv(output_path, index=False, encoding='utf-8-sig')
+        print(f"\nDados agregados salvos: {output_path}")
+        
+        return df_agg
