@@ -217,3 +217,71 @@ class ANSProcessor:
         
         print(f"Cadastro salvo: {output_path}")
         return output_path
+    
+    def enrich_data(self, consolidated_csv: str, cadastro_csv: str, output_file: str = "despesas_enriquecidas.csv") -> pd.DataFrame:
+        df_despesas = pd.read_csv(self.output_dir / consolidated_csv, encoding='utf-8-sig')
+        
+        encodings = ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']
+        df_cadastro = None
+        for encoding in encodings:
+            try:
+                df_cadastro = pd.read_csv(self.output_dir / cadastro_csv, encoding=encoding, sep=';', low_memory=False)
+                break
+            except:
+                continue
+        
+        if df_cadastro is None:
+            raise ValueError("Não foi possível ler o arquivo de cadastro")
+        
+        df_cadastro.columns = df_cadastro.columns.str.lower().str.strip()
+        
+        cnpj_col = None
+        for col in df_cadastro.columns:
+            if 'cnpj' in col:
+                cnpj_col = col
+                break
+        
+        if cnpj_col:
+            df_cadastro['CNPJ'] = df_cadastro[cnpj_col].apply(lambda x: normalize_cnpj(str(x)) if pd.notna(x) else '')
+        
+        registro_col = None
+        for col in df_cadastro.columns:
+            if 'registro' in col or 'ans' in col:
+                registro_col = col
+                break
+        
+        modalidade_col = None
+        for col in df_cadastro.columns:
+            if 'modalidade' in col:
+                modalidade_col = col
+                break
+        
+        uf_col = None
+        for col in df_cadastro.columns:
+            if 'uf' in col or 'estado' in col:
+                uf_col = col
+                break
+        
+        df_cadastro_clean = df_cadastro[['CNPJ']].copy()
+        if registro_col:
+            df_cadastro_clean['RegistroANS'] = df_cadastro[registro_col]
+        if modalidade_col:
+            df_cadastro_clean['Modalidade'] = df_cadastro[modalidade_col]
+        if uf_col:
+            df_cadastro_clean['UF'] = df_cadastro[uf_col]
+        
+        df_cadastro_clean = df_cadastro_clean.drop_duplicates(subset=['CNPJ'], keep='first')
+        
+        print(f"\nRegistros de despesas: {len(df_despesas)}")
+        print(f"Registros de cadastro: {len(df_cadastro_clean)}")
+        
+        df_enriched = df_despesas.merge(df_cadastro_clean, on='CNPJ', how='left')
+        
+        unmatched = df_enriched['RegistroANS'].isna().sum() if 'RegistroANS' in df_enriched.columns else len(df_enriched)
+        print(f"Registros sem match no cadastro: {unmatched}")
+        
+        output_path = self.output_dir / output_file
+        df_enriched.to_csv(output_path, index=False, encoding='utf-8-sig')
+        print(f"\nDados enriquecidos salvos: {output_path}")
+        
+        return df_enriched
