@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from typing import List, Dict, Tuple
+from src.etl.validator import validate_cnpj, normalize_cnpj
 
 class ANSProcessor:
     def __init__(self, output_dir: str = "data/processed"):
@@ -133,3 +134,59 @@ class ANSProcessor:
                     continue
         
         return all_data
+    
+    def consolidate_data(self, data: List[Dict], output_file: str = "consolidado_despesas.csv") -> pd.DataFrame:
+        if len(data) == 0:
+            print("\n AVISO: Nenhum dado foi extraído dos arquivos!")
+            print("Criando DataFrame vazio para prosseguir")
+            df = pd.DataFrame(columns=['CNPJ', 'RazaoSocial', 'Trimestre', 'Ano', 'ValorDespesas'])
+        else:
+            df = pd.DataFrame(data)
+        
+        print(f"\nTotal de registros antes da limpeza: {len(df)}")
+        
+        if len(df) == 0:
+            print("Nenhum registro para processar. Salvando arquivo vazio.")
+            output_path = self.output_dir / output_file
+            df.to_csv(output_path, index=False, encoding='utf-8-sig')
+            return df
+        
+        df['CNPJ'] = df['CNPJ'].apply(lambda x: normalize_cnpj(str(x)) if pd.notna(x) else '')
+        
+        df = df[df['CNPJ'].str.len() > 0]
+        
+        df['ValorDespesas'] = pd.to_numeric(df['ValorDespesas'], errors='coerce').fillna(0)
+        
+        print(f"\nInconsistências encontradas:")
+        print(f"- Valores zerados ou negativos: {len(df[df['ValorDespesas'] <= 0])}")
+        
+        cnpj_duplicates = df.groupby('CNPJ')['RazaoSocial'].nunique()
+        print(f"- CNPJs com razões sociais diferentes: {len(cnpj_duplicates[cnpj_duplicates > 1])}")
+        
+        df_valid_cnpj = df[df['CNPJ'].apply(validate_cnpj)]
+        print(f"- CNPJs inválidos removidos: {len(df) - len(df_valid_cnpj)}")
+        df = df_valid_cnpj
+        
+        def get_most_common_razao(group):
+            return group['RazaoSocial'].mode()[0] if len(group['RazaoSocial'].mode()) > 0 else group['RazaoSocial'].iloc[0]
+        
+        razao_mapping = df.groupby('CNPJ').apply(get_most_common_razao).to_dict()
+        df['RazaoSocial'] = df['CNPJ'].map(razao_mapping)
+        
+        df = df[df['ValorDespesas'] > 0]
+        
+        df = df[['CNPJ', 'RazaoSocial', 'Trimestre', 'Ano', 'ValorDespesas']]
+        
+        print(f"\nTotal de registros após limpeza: {len(df)}")
+        
+        output_path = self.output_dir / output_file
+        df.to_csv(output_path, index=False, encoding='utf-8-sig')
+        print(f"\nArquivo consolidado salvo: {output_path}")
+        
+        import zipfile
+        zip_path = self.output_dir / output_file.replace('.csv', '.zip')
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            zipf.write(output_path, output_file)
+        print(f"Arquivo compactado: {zip_path}")
+        
+        return df
