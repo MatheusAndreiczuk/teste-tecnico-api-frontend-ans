@@ -72,6 +72,20 @@ class ANSProcessor:
         
         return normalized_df
     
+    def _extract_quarter(self, date_str) -> str:
+        if pd.isna(date_str):
+            return 'Q1'
+        
+        try:
+            date_str = str(date_str)
+            if 'T' in date_str or len(date_str) > 10:
+                date = pd.to_datetime(date_str)
+                return f"Q{(date.month - 1) // 3 + 1}"
+        except:
+            pass
+        
+        return 'Q1'
+    
     def process_files(self, directories: List[Tuple[str, str, Path]]) -> List[Dict]:
         all_data = []
         
