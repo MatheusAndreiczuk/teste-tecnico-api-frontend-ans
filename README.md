@@ -18,7 +18,7 @@ docker-compose up -d db
 pip install -r requirements.txt
 python run_etl.py
 
-# 3. Importar dados no banco
+# 3. Importar dados no banco - em caso de erro prosseguir para instruções abaixo
 .\migrate_data.ps1
 
 # 4. Subir API (escolha uma opção)
