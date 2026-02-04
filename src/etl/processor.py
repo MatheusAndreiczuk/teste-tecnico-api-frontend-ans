@@ -183,7 +183,7 @@ class ANSProcessor:
                 break
         
         if csv_link:
-            df_cadastro = pd.read_csv(csv_link, encoding='latin1', sep=';', low_memory=False)
+            df_cadastro = pd.read_csv(csv_link, encoding='utf-8', sep=';', low_memory=False)
             df_cadastro.columns = df_cadastro.columns.str.strip()
             
             df_cadastro['REG_ANS'] = df_cadastro['Registro_ANS'].astype(str).str.strip() if 'Registro_ANS' in df_cadastro.columns else df_cadastro['REGISTRO_OPERADORA'].astype(str).str.strip()
@@ -245,7 +245,7 @@ class ANSProcessor:
         
         print(f"Baixando cadastro de operadoras: {csv_link}")
         
-        df = pd.read_csv(csv_link, encoding='latin1', sep=';', low_memory=False)
+        df = pd.read_csv(csv_link, encoding='utf-8', sep=';', low_memory=False)
         df.columns = df.columns.str.strip()
         
         df_normalized = pd.DataFrame()
