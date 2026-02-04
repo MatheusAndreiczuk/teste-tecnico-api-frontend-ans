@@ -42,24 +42,22 @@ def main():
         data_files = processor.find_despesas_files(all_files)
         
         if not data_files:
-            print("Erro: Nenhum arquivo de despesas identificado.")
-            print("Os arquivos baixados não contêm o formato de dados esperado.")
+            print("Erro: Nenhum arquivo identificado para processamento.")
             sys.exit(1)
         
-        print(f"Encontrados: {len(data_files)} arquivos de despesas\n")
+        print(f"Encontrados: {len(data_files)} arquivos para processar\n")
         
         print("Processando e consolidando dados...")
         data = processor.process_files(data_files)
         
         if not data:
-            print("Erro: Nenhum registro extraído dos arquivos.")
+            print("Erro: Nenhum registro de eventos/sinistros extraído dos arquivos.")
             sys.exit(1)
         
         df_consolidated = processor.consolidate_data(data)
         
         if len(df_consolidated) == 0:
             print("Erro: Nenhum registro válido após a validação.")
-            print("Todos os registros foram removidos devido a CNPJs inválidos ou valores zerados.")
             sys.exit(1)
         
         print(f"Consolidado: {len(df_consolidated)} registros\n")
