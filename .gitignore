@@ -14,3 +14,5 @@ data/processed/
 *.zip
 postgres_data/
 .DS_Store
+node_modules
+package-lock.json
