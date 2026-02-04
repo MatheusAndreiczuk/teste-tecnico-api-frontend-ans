@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, Integer, Numeric, DateTime, Index
-from sqlalchemy.sql import func
+from sqlalchemy import Column, String, Integer, Numeric, Index
 from src.core.database import Base
 
 
@@ -12,7 +11,6 @@ class DespesaConsolidada(Base):
     trimestre = Column(String(10), nullable=False)
     ano = Column(String(4), nullable=False)
     valor_despesas = Column(Numeric(15, 2), nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     __table_args__ = (
         Index('idx_cnpj_ano_trimestre', 'cnpj', 'ano', 'trimestre'),
@@ -28,7 +26,6 @@ class OperadoraCadastro(Base):
     razao_social = Column(String(255))
     modalidade = Column(String(100))
     uf = Column(String(2))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class DespesaAgregada(Base):
@@ -41,7 +38,6 @@ class DespesaAgregada(Base):
     media_despesas = Column(Numeric(15, 2))
     desvio_padrao = Column(Numeric(15, 2))
     num_registros = Column(Integer)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     __table_args__ = (
         Index('idx_razao_social_uf', 'razao_social', 'uf'),
