@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "ans-operadoras-api",
+    "name": "ANS Operadoras API",
+    "description": "Coleção de endpoints da API de Operadoras ANS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Listar Operadoras",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras?page=1&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras"],
+          "query": [
+            {"key": "page", "value": "1", "description": "Número da página"},
+            {"key": "limit", "value": "10", "description": "Itens por página"},
+            {"key": "search", "value": "", "description": "Busca por razão social ou CNPJ", "disabled": true},
+            {"key": "uf", "value": "", "description": "Filtrar por UF", "disabled": true}
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Sucesso",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"cnpj\": \"54991211000162\",\n      \"razao_social\": \"UNIMED DE ASSIS\",\n      \"registro_ans\": \"300713\",\n      \"modalidade\": \"Cooperativa Médica\",\n      \"uf\": \"SP\"\n    }\n  ],\n  \"total\": 791,\n  \"page\": 1,\n  \"limit\": 10,\n  \"pages\": 80\n}"
+        }
+      ]
+    },
+    {
+      "name": "Listar Operadoras com Busca",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras?page=1&limit=10&search=unimed",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras"],
+          "query": [
+            {"key": "page", "value": "1"},
+            {"key": "limit", "value": "10"},
+            {"key": "search", "value": "unimed"}
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Operadoras por UF",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras?page=1&limit=10&uf=SP",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras"],
+          "query": [
+            {"key": "page", "value": "1"},
+            {"key": "limit", "value": "10"},
+            {"key": "uf", "value": "SP"}
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Operadoras - Busca + UF",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras?page=1&limit=25&search=bradesco&uf=RJ",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras"],
+          "query": [
+            {"key": "page", "value": "1"},
+            {"key": "limit", "value": "25"},
+            {"key": "search", "value": "bradesco"},
+            {"key": "uf", "value": "RJ"}
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Operadoras - Busca por CNPJ",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras?search=92693118",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras"],
+          "query": [
+            {"key": "search", "value": "92693118", "description": "Busca parcial por CNPJ"}
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Operadoras - Paginação 50 itens",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras?page=1&limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras"],
+          "query": [
+            {"key": "page", "value": "1"},
+            {"key": "limit", "value": "50", "description": "Máximo de itens por página"}
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Obter Operadora por CNPJ",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras/54991211000162",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras", "54991211000162"]
+        }
+      },
+      "response": [
+        {
+          "name": "Sucesso",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": 1,\n  \"cnpj\": \"54991211000162\",\n  \"razao_social\": \"UNIMED DE ASSIS\",\n  \"registro_ans\": \"300713\",\n  \"modalidade\": \"Cooperativa Médica\",\n  \"uf\": \"SP\",\n  \"total_despesas\": 27582.00,\n  \"num_trimestres\": 3\n}"
+        },
+        {
+          "name": "Não Encontrada",
+          "status": "Not Found",
+          "code": 404,
+          "body": "{\n  \"detail\": \"Operadora não encontrada\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Obter Despesas da Operadora",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras/54991211000162/despesas?page=1&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras", "54991211000162", "despesas"],
+          "query": [
+            {"key": "page", "value": "1"},
+            {"key": "limit", "value": "10"}
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Sucesso",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"cnpj\": \"54991211000162\",\n      \"razao_social\": \"UNIMED DE ASSIS\",\n      \"trimestre\": \"3T\",\n      \"ano\": 2025,\n      \"valor_despesas\": 23670.00\n    },\n    {\n      \"id\": 2,\n      \"cnpj\": \"54991211000162\",\n      \"razao_social\": \"UNIMED DE ASSIS\",\n      \"trimestre\": \"2T\",\n      \"ano\": 2025,\n      \"valor_despesas\": 3291.00\n    }\n  ],\n  \"total\": 3,\n  \"page\": 1,\n  \"limit\": 10,\n  \"pages\": 1\n}"
+        }
+      ]
+    },
+    {
+      "name": "Obter Despesas da Operadora - Todas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/operadoras/92693118000160/despesas?limit=100",
+          "host": ["{{base_url}}"],
+          "path": ["api", "operadoras", "92693118000160", "despesas"],
+          "query": [
+            {"key": "limit", "value": "100", "description": "Pegar todos os registros"}
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Obter Estatísticas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/estatisticas",
+          "host": ["{{base_url}}"],
+          "path": ["api", "estatisticas"]
+        }
+      },
+      "response": [
+        {
+          "name": "Sucesso",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"gerais\": {\n    \"total_operadoras\": 791,\n    \"total_despesas\": 35000000000.00,\n    \"media_despesas\": 42000000.00,\n    \"total_registros\": 827\n  },\n  \"top_operadoras\": [\n    {\n      \"cnpj\": \"92693118000160\",\n      \"razao_social\": \"BRADESCO SAÚDE S.A.\",\n      \"total_despesas\": 24208108339.00,\n      \"uf\": \"RJ\"\n    }\n  ],\n  \"distribuicao_uf\": [\n    {\n      \"uf\": \"RJ\",\n      \"total_despesas\": 24867863539.00,\n      \"num_operadoras\": 37,\n      \"percentual\": 70.12\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      },
+      "response": [
+        {
+          "name": "Sucesso",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"healthy\"\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    }
+  ]
+}
