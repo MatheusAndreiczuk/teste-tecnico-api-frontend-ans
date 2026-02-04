@@ -35,6 +35,33 @@ npm run dev
 API: http://localhost:8000 (Swagger: /docs)
 Frontend: http://localhost:3000
 
+###  Erro "não está assinado digitalmente" no Windows
+
+Se o PowerShell bloquear a execução do `migrate_data.ps1`, escolha uma opção:
+
+**Opção 1:** Permitir scripts locais
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+.\migrate_data.ps1
+```
+
+**Opção 2:** Bypass apenas para este script
+```powershell
+powershell -ExecutionPolicy Bypass -File .\migrate_data.ps1
+```
+
+**Opção 3:** Executar comandos manualmente
+```powershell
+# Copiar CSVs para o container
+$container = docker-compose ps -q db
+docker cp data/processed/consolidado_despesas.csv "${container}:/tmp/consolidado_despesas.csv"
+docker cp data/processed/operadoras_cadastro.csv "${container}:/tmp/operadoras_cadastro.csv"
+
+# Criar tabelas e importar
+Get-Content sql/01_create_tables.sql | docker-compose exec -T db psql -U postgres -d ans_data
+Get-Content sql/02_import_data.sql | docker-compose exec -T db psql -U postgres -d ans_data
+```
+
 ## Estrutura
 
 ```
